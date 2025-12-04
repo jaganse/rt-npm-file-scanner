@@ -43,9 +43,6 @@ It automatically fetches the latest Indicators of Compromise (IOCs) from JFrog R
 ## **How It Works**
 
 1. **Fetch:** Downloads the IOC CSV from JFrog Research.  
-2. **Normalize:**  
-   * It extracts the **Package Name** (Column 1\) and **Versions** (Column 3).  
-   * It cleans up syntax, removing square brackets \[\] and handling version splits.  
 3. **Filename Construction:**  
    * The script converts npm package names to Artifactory storage filenames.  
    * **Scoped Packages:** If a package is named @accordproject/concerto-analysis, the script strips the scope to search for the actual filename concerto-analysis-3.24.1.tgz.  
@@ -55,8 +52,16 @@ It automatically fetches the latest Indicators of Compromise (IOCs) from JFrog R
 
 ## **Output**
 
-The script prints progress to the console and saves a detailed report to `aql_scan_report.csv`.
+The script generates two files upon completion:
 
+### **1\. found\_artifacts.csv (Action Required)**
+
+Contains **only** the malicious artifacts successfully found in your Artifactory instance. If this file is not empty, immediate action is required.
+
+
+### **2\. full\_scan\_log.csv (Audit Trail)**
+
+A complete log of every single package/version pair checked against Artifactory, including those that were NOT\_FOUND. Use this for audit purposes to prove the scan covered all targets.
 
 <!-- ## **License**
 
