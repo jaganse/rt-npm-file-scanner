@@ -38,9 +38,16 @@ It automatically fetches the latest Indicators of Compromise (IOCs) from JFrog R
 ```
 2. **Run the Scanner:**  
 ```
-   ./rt-aql-scanner.sh https://your-artifactory-url.com
+   ./rt-aql-scanner.sh -u 'https://your-artifactory-url.com'
 ```
-## **How It Works**
+3. **(Optional) Specify a repository**i
+   You can optinally point the script at a specific repository, and the AQL will be adjusted accordingly.
+```
+   ./rt-aql-scanner.sh -u 'https://your-artifactory-url.com' -r 'your-repository-name'
+```
+#
+#
+# **How It Works**
 
 1. **Fetch:** Downloads the IOC CSV from JFrog Research.  
 3. **Filename Construction:**  

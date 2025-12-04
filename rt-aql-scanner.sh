@@ -14,13 +14,16 @@
 # ==============================================================================
 Help() {
    # Display Help
-   echo "Add description of the script functions here."
+   echo "This tool is a shell script designed to scan a JFrog Artifactory instance for malicious packages associated with the Shai-Hulud 2.0 supply chain attack."
+   echo
+   echo "It automatically fetches the latest Indicators of Compromise (IOCs) from JFrog Research, constructs the expected filenames for the malicious artifacts" 
+   echo "(handling npm scopes and versioning), and uses Artifactory Query Language (AQL) to identify if any of these files exist in your repositories."
    echo
    echo "Syntax: rt-aql-scanner.sh [-r|h|u]"
    echo "options:"
+   echo "u     Specify the Artifactory URL to run the script against."
    echo "r     (Optional) Specify the repository you want to run the script against."
    echo "h     Print this Help."
-   echo "u     Specify the Artifactory URL to run the script against."
    echo
 }
 
