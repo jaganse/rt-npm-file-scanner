@@ -40,7 +40,7 @@ It automatically fetches the latest Indicators of Compromise (IOCs) from JFrog R
 ```
    ./rt-aql-scanner.sh -u 'https://your-artifactory-url.com'
 ```
-3. **(Optional) Specify a repository**i
+3. **(Optional) Specify a repository**
    You can optinally point the script at a specific repository, and the AQL will be adjusted accordingly.
 ```
    ./rt-aql-scanner.sh -u 'https://your-artifactory-url.com' -r 'your-repository-name'
