@@ -9,8 +9,41 @@
 # 4. Saves confirmed hits to a dedicated 'found_artifacts.csv' file.
 # ==============================================================================
 
+# ==============================================================================
+# Help Information
+# ==============================================================================
+Help() {
+   # Display Help
+   echo "This tool is a shell script designed to scan a JFrog Artifactory instance for malicious packages associated with the Shai-Hulud 2.0 supply chain attack."
+   echo
+   echo "It automatically fetches the latest Indicators of Compromise (IOCs) from JFrog Research, constructs the expected filenames for the malicious artifacts" 
+   echo "(handling npm scopes and versioning), and uses Artifactory Query Language (AQL) to identify if any of these files exist in your repositories."
+   echo
+   echo "Syntax: rt-aql-scanner.sh [-r|h|u]"
+   echo "options:"
+   echo "u     Specify the Artifactory URL to run the script against."
+   echo "r     (Optional) Specify the repository you want to run the script against."
+   echo "h     Print this Help."
+   echo
+}
+
+# Parsing Command Line Arguments 
+while getopts ":hru:" option; do
+   case $option in
+      h) # Show Help Information 
+	 Help
+	 exit;;
+      r) # Specify Repo Name
+         REPO=$OPTARG;;
+      u) # Specify Artifactory URL
+         ARTIFACTORY_URL=$OPTARG;;
+     \?) # Invalid option
+         echo "Error: Invalid option"
+         exit;;
+   esac
+done
+
 # --- Configuration ---
-ARTIFACTORY_URL=$1
 CSV_URL="https://research.jfrog.com/shai_hulud_2_packages.csv"
 TEMP_DIR="aql_scan_tmp"
 TARGET_LIST="$TEMP_DIR/targets.txt"
@@ -21,12 +54,12 @@ FOUND_LOG="found_artifacts.csv"   # Contains ONLY items found in Artifactory
 
 # --- Pre-flight Checks ---
 # Check if ARTIFACTORY_URL is empty
-if [ -z "$1" ]; then
-    echo "Error: Environment variable ARTIFACTORY_URL (\$1) is not set."
-    echo "Usage: sh rt-aql-scanner.sh 'https://your-artifactory-url.com'"
+if [ -z "$ARTIFACTORY_URL" ]; then
+    echo "Error: ARTIFACTORY_URL argument (-u) is not set."
+    echo "Usage: sh rt-aql-scanner.sh -u 'https://your-artifactory-url.com'"
     exit 1 # Exit with an error status
 else
-    echo "The ARTIFACTORY_URL (\$1) is: $1"
+    echo "The ARTIFACTORY_URL (-u) is: $ARTIFACTORY_URL"
 fi
 
 if [ -z "$rt_token" ]; then
@@ -38,6 +71,13 @@ fi
 if ! command -v jq &> /dev/null; then
     echo "Error: 'jq' is required for this script."
     exit 1
+fi
+
+# Construct AQL Query
+if [[ -n "$REPO" ]]; then
+    AQL_QUERY="items.find({\"repo\":{\"\$eq\":\"$REPO\"},\"name\":{\"\$eq\":\"$FILE_NAME\"}})"
+else
+    AQL_QUERY="items.find({\"name\":{\"\$eq\":\"$FILE_NAME\"}})"
 fi
 
 mkdir -p "$TEMP_DIR"
@@ -106,10 +146,7 @@ while read -r pkg_name pkg_version; do
 
     # Progress bar effect
     printf "\rScanning [%s/%s]: %s                   " "$COUNTER" "$TOTAL_TARGETS" "$FILE_NAME"
-
-    # Construct AQL Query
-    AQL_QUERY="items.find({\"name\":{\"\$eq\":\"$FILE_NAME\"}})"
-
+    
     # Execute API Call
     RESPONSE=$(curl -s -X POST "$ARTIFACTORY_URL/artifactory/api/search/aql" \
       -H "Authorization: Bearer $rt_token" \
